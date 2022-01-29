@@ -1,0 +1,72 @@
+
+I need to come up with a design architecture that lets me have 
+Factory Pattern and Dependency Injection. I'm just gonna 
+	
+classes
+	- App - main web app class, part of it is static
+		Methods:
+		  
+		  Method:
+		  ----------------------
+			- App::__constructor()
+				- creates default settings and configuration for the app
+				- Loads al default and custom dependencies 
+				
+				
+		Route creation Methods:
+		<=====================>
+			
+				
+		  Method:
+		  ----------------------			
+			- App::create_route()
+				- params:
+					1: String - HTTP method
+					2: String - URL or Page Name
+					3: Array  - [ String => Class, String => Method ]
+						ex. array( 'controller' => 'Main', 'Method' => 'index' )
+						
+				- Used by all route creation methods below
+				  - App::get()			=> creates a custom route
+				  - App::post()			=> creates a custom route
+				  - App::any()			=> creates a custom route
+				  - App::delete()		=> creates a custom route
+				  - App::update()		=> creates a custom route
+				  - App::insert()		=> creates a custom route
+				  
+			   App::create_route() Logic
+			   -------------------------
+				Creates or Gets Router Instance
+				- $router 	= App::service( routing )
+				- $route 	= $router::create_route()
+				- App::save_route( $route )
+							
+				
+				
+		  Method:
+		  ----------------------
+			- App::run() 				
+				- App::config()							=> finishes configuration
+				- $router = App::service( $routing )
+				- $router::listen()			=> listen for requests
+				- $router::dispatch( $request )
+				
+				Returns:
+					- Request() Object
+						
+		  Method:
+		  ----------------------
+			- App::service( $service_name )
+				$service = App::service_collection[ $service_name ]
+				if ( !service_exist( $service ) )
+					App::create_service( $service_name )
+				return App::service_collection[ router_service ]
+				
+				
+				
+		  Method:
+		  ----------------------
+			- App::create_service( $service_name )
+				- $service = App::template( $service_name )
+				- App::service_collection[ $service ] = new $service()
+				
