@@ -6,30 +6,24 @@ namespace core;
 require_once 'Request.php';
 require_once 'Router.php';
 require_once 'Route.php';
-require_once 'http.php';
 require_once 'RouteFactory.php';
 
 
 
 
 
-class App
-{
-    
-    protected static $app_instance = '';
-    
-    
-    
+class App {
+    // singleton
+    protected static $_instance = '';
     
     
     /////////////////////////////
     //        CONTAINERS       //
     /////////////////////////////
     
-    protected $_routes      = array(); // route collection
-    protected $_services    = array(); // services
-    protected $_templates   = array(); 
+    protected $_routes    = array(); // route collection
     
+    protected $_container;              // services container
     
     protected $_request;
     protected $_response;
@@ -37,13 +31,11 @@ class App
     // END OF CONTAINERS SECTIONS //
     
     
-    
-    
     ///////////////////////////////
     //      SETTING ARRAYS       //
     ///////////////////////////////
     
-    protected $factory_settings = array();
+    protected $_settings = array();
     
     // END OF SETTING ARRAYS SECTION //
     
@@ -69,117 +61,74 @@ class App
     // END OF USEFUL CONSTANTS SECTION //
     
     
-    public function __construct( $templates )
-    {
-        $this->_templates = $templates;
-        $this->service( self::ROUTING );
+    private function __construct(){}
+    
+    public static function get_instance() {
+        if ( self::$_instance == null ) {
+            self::$_instance = new App();
+        }
+        return self::$_instance;
     }
     
-    public function run()
-    {
-        $this->config();
-        $router = $this->service( self::ROUTING );
-        $router->listen();
-        $router->dispatch();
+    public function add_dependencies( $container ) {
+        $this->_container = $container;
     }
     
-    public function config(){} // dnt know what to do here yet
-
-    public function create_route( $method, $page, $action )
-    {
-        $router = $this->service( self::ROUTING );
-        $route  = $router->create_route( $method, $page, $action );
-        $this->save_route( $route );
-    }
+    public function run() {}
     
-    public function save_route( $route )
-    {
+    public function config( $settings ){} // dnt know what to do here yet
+    
+    public function save_route( $route ) {
         // if found true else false
-        $found = isset( $this->_routes[ $route->name() ] );
+        $found = isset( $this->_routes[ $route->get_name() ] );
         $saved = false;
         
-        if ( !$found ) // if not found
-        {
-            $this->_routes[ $route->name() ] = $route;
+        if ( !$found ) {
+            $this->_routes[ $route->get_name() ] = $route;
             $saved = true;
         }
         
         return $saved;
     }
     
-    public function &get_routes()
-    {
-        return $this->_routes;
-    }
+    public function &get_routes(){ return $this->_routes; }
     
-    public function template( $name )
-    {
-        $template = $this->_templates[ $name ];
-        
-        if ( $template = null )
-        {
-            $template = false;
-        }
-        
-        return $template;
-    }
+    // todo: if route not found return a not found route
+    public function find_route( $name ) { return $this->_routes[ $name ]; }
     
-    public function service( $name )
-    {
+    public function service( $name ) {
         $service = $this->_services[ $name ];
         
         if ( $service == null | $service == '' )
-        {
             $this->create_service( $name );
-        }
         
         return $service;
     }
     
-    public function create_service( $name )
-    {
+    public function create_service( $name ) {
         $serviceTemplate = $this->_templates[ $name ];
-        if ( $serviceTemplate != null | $serviceTemplate != '' )
-        {
+        
+        if ( $serviceTemplate != null | $serviceTemplate != '' ) {
             $service = new $serviceTemplate( $this, $name );
             $this->save_service( $service );
             echo $service->name();
         }
-        else {
-            echo $this->_templates[ $name ];
-        }
         
         return $service;
     }
     
-    public function save_service( $service )
-    {
+    public function save_service( $service ) {
         if ( !isset( $this->_services[ $service->name() ] ) )
-        {
             $this->_services[ $service->name() ] = $service;
-        }
     }
     
-    public function get( $page, $action )
-    {
-        $this->create_route( self::GET, $page, $action );
-    }
-    public function post( $page, $action )
-    {
-        $this->create_route(self::POST, $page, $action );
-    }
-    public function put( $page, $action )
-    {
-        $this->create_route( self::PUT, $page, $action );
-    }
-    public function delete( $page, $action )
-    {
-        $this->create_route(self::DELETE, $page, $action );
-    }
-    public function update( $page, $action )
-    {
-        $this->create_route(self::UPDATE, $page, $action );
-    }
+    
+    // route registers
+    public function get(     $page, $action ) { $this->save_route( Route::get(    $page, $action ) ); }
+    public function post(    $page, $action ) { $this->save_route( Route::post(   $page, $action ) ); }
+    public function put(     $page, $action ) { $this->save_route( Route::put(    $page, $action ) ); }
+    public function delete(  $page, $action ) { $this->save_route( Route::delete( $page, $action ) ); }
+    public function update(  $page, $action ) { $this->save_route( Route::update( $page, $action ) ); }
 
 }
 
