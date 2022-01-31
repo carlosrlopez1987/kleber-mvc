@@ -4,10 +4,7 @@ namespace core;
 class Router {
     
     protected $_handler;
-    protected $_routes = array();
     protected $_request = array();
-    
-    protected $route_template;
     
     public const ROUTE   = 'route';
     protected $_name;
@@ -16,30 +13,41 @@ class Router {
     public function __construct() {}
     
     public function name( $name = null ) {
-        if ( $name != null ) $this->_name = $name;
+        if ( $name != null && !isset($name) ) $this->_name = $name;
         return $this->_name;
     }
     
     public function listen() {
         $req = $this->get_request();
+        // sends request for processing
+        $this->submit( $req );    
+    }
+    
+    /*
+     * Returns an associative array containing request information
+     * 
+     * 
+     */
+    public function get_request() {
+        $req = array (
+          "scheme" => $_SERVER[ "REQUEST_SCHEME" ],
+          "method" => $_SERVER[ "REQUEST_METHOD" ],
+          "url"    => self::get_page_from_uri( $_SERVER[ "REQUEST_URI" ] ),
+          "params" => self::get_params_from_uri( $_SERVER[ "REQUEST_URI" ] )
+        );
         
-        $this->_request[ 'scheme' ] = $req->scheme();
-        $this->_request[ 'method' ] = $req->method();
-        // $this->_request[ 'action' ] we will need to find this from routes available
-        $this->_request[ 'page'   ] = $req->page();
-        $this->_request[ 'params' ] = $req->params();
+       return $req;
     }
     
     public function find_route( $route ) {
         $routes = $this->get_routes();
         $found = false;
        
-        foreach( $routes as $found_route ) {
-            if ( $found_route->name() == $route->name() ) {
-                break;
-            }
-            $found = $found_route;
-        }
+        if ( $route != null && isset( $route ) )
+            return $found;
+        
+        if ( $routes != null )
+            $found = $routes[ $route->get_method() ][ $route->get_name() ];
         
         return $found;
     }
@@ -64,6 +72,36 @@ class Router {
             $this->_handler = $set;
         
         return $this->_handler;
+    }
+    
+    public static function remove_slashes( $str ):string {
+        return rtrim( ltrim( $str, '/' ), '/' );
+    }
+    
+    // returns a string 
+    public static function get_page_from_uri( $uri ):string {
+        $token = '/';
+        if ( $uri == $token ) return "index";
+        $url = explode( $token, self::remove_slashes( $uri ) );
+        
+        return $url[ 0 ];
+    }
+    
+    public static function get_params_from_uri( $uri ) {
+        $params = self::remove_slashes( $uri );
+        $token = '/';
+        $hasSlash = strpos( $params, $token );
+        
+        
+        if ( $hasSlash ) {
+            $params = substr( $params, $hasSlash );
+            if ( $params[0] == $token || $params[ strlen( $params ) - 1 ] == $token )
+                $params = self::remove_slashes( $params );
+        }
+        
+        $params = explode( $token, $params );
+        
+        return $params;
     }
    
 }

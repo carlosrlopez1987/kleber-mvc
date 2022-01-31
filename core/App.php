@@ -6,7 +6,6 @@ namespace core;
 require_once 'Request.php';
 require_once 'Router.php';
 require_once 'Route.php';
-require_once 'RouteFactory.php';
 
 
 
@@ -74,17 +73,34 @@ class App {
         $this->_container = $container;
     }
     
-    public function run() {}
+    public function run() {
+        $url = $_SERVER[ "REQUEST_URI" ];
+        $url = rtrim( ltrim( $url, '/' ), '/' );
+        $method = $_SERVER[ "REQUEST_METHOD" ];
+        
+        $routes = $this->get_routes();
+        
+        if ( strlen( $url ) == 0 )
+            $route = $this->get_notFound(); 
+        else
+            $route = $routes[ $method ][ $url ];
+        
+        echo $route->get_name();
+    }
+    
+    public function get_notFound() {
+        return $this->_routes[ "GET" ][ "404" ];
+    }
     
     public function config( $settings ){} // dnt know what to do here yet
     
-    public function save_route( $route ) {
+    public function register_route( $route ) {
         // if found true else false
         $found = isset( $this->_routes[ $route->get_name() ] );
         $saved = false;
         
         if ( !$found ) {
-            $this->_routes[ $route->get_name() ] = $route;
+            $this->_routes[ $route->get_method() ][ $route->get_name() ] = $route;
             $saved = true;
         }
         
@@ -124,11 +140,11 @@ class App {
     
     
     // route registers
-    public function get(     $page, $action ) { $this->save_route( Route::get(    $page, $action ) ); }
-    public function post(    $page, $action ) { $this->save_route( Route::post(   $page, $action ) ); }
-    public function put(     $page, $action ) { $this->save_route( Route::put(    $page, $action ) ); }
-    public function delete(  $page, $action ) { $this->save_route( Route::delete( $page, $action ) ); }
-    public function update(  $page, $action ) { $this->save_route( Route::update( $page, $action ) ); }
+    public function get(     $page, $action ) { $this->register_route( Route::get(    $page, $action ) ); }
+    public function post(    $page, $action ) { $this->register_route( Route::post(   $page, $action ) ); }
+    public function put(     $page, $action ) { $this->register_route( Route::put(    $page, $action ) ); }
+    public function delete(  $page, $action ) { $this->register_route( Route::delete( $page, $action ) ); }
+    public function update(  $page, $action ) { $this->register_route( Route::update( $page, $action ) ); }
 
 }
 

@@ -34,7 +34,7 @@ class Route
     
     
     
-    private static function make( $method, $page, $action, $name = null ):Route {
+    public static function make( $method, $page, $action, $name = null ):Route {
         return new Route( $method, $page, $action, $name );
     }
     
