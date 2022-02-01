@@ -34,26 +34,28 @@ class Route
     
     
     
-    public static function make( $method, $page, $action, $name = null ):Route {
-        return new Route( $method, $page, $action, $name );
+    public static function make( $method, $page, $action, $name = null ) {
+        $route = new Route( $method, $page, $action, $name );
+        if ( $route != null )
+            App::get_instance()->register_route( $route );
     }
     
     // Route creation methods
     // to make routes, each method create and return and instance of a route
     public static function get( $page, $action, $name = null ){ 
-        return self::make( "GET", $page, $action, $name ); 
+        self::make( "GET", $page, $action, $name ); 
     }
     public static function post( $page, $action, $name = null ){
-        return self::make( "POST", $page, $action, $name );
+        self::make( "POST", $page, $action, $name );
     }
     public static function put( $page, $action, $name = null ){
-        return self::make( "PUT", $page, $action, $name );
+        self::make( "PUT", $page, $action, $name );
     }
     public static function delete( $page, $action, $name = null ){
-        return self::make( "DELETE", $page, $action, $name );
+        self::make( "DELETE", $page, $action, $name );
     }
     public static function update( $page, $action, $name = null ){
-        return self::make( "UPDATE", $page, $action, $name );
+        self::make( "UPDATE", $page, $action, $name );
     }
 }
 

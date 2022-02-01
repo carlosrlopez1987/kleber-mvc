@@ -74,18 +74,7 @@ class App {
     }
     
     public function run() {
-        $url = $_SERVER[ "REQUEST_URI" ];
-        $url = rtrim( ltrim( $url, '/' ), '/' );
-        $method = $_SERVER[ "REQUEST_METHOD" ];
         
-        $routes = $this->get_routes();
-        
-        if ( strlen( $url ) == 0 )
-            $route = $this->get_notFound(); 
-        else
-            $route = $routes[ $method ][ $url ];
-        
-        echo $route->get_name();
     }
     
     public function get_notFound() {
@@ -94,10 +83,11 @@ class App {
     
     public function config( $settings ){} // dnt know what to do here yet
     
-    public function register_route( $route ) {
+    public function register_route( &$route ) {
         // if found true else false
-        $found = isset( $this->_routes[ $route->get_name() ] );
         $saved = false;
+        if ( $route == null ) return false;
+        $found = isset( $this->_routes[ $route->get_method() ][ $route->get_name() ] );
         
         if ( !$found ) {
             $this->_routes[ $route->get_method() ][ $route->get_name() ] = $route;
@@ -121,17 +111,6 @@ class App {
         return $service;
     }
     
-    public function create_service( $name ) {
-        $serviceTemplate = $this->_templates[ $name ];
-        
-        if ( $serviceTemplate != null | $serviceTemplate != '' ) {
-            $service = new $serviceTemplate( $this, $name );
-            $this->save_service( $service );
-            echo $service->name();
-        }
-        
-        return $service;
-    }
     
     public function save_service( $service ) {
         if ( !isset( $this->_services[ $service->name() ] ) )
@@ -140,11 +119,11 @@ class App {
     
     
     // route registers
-    public function get(     $page, $action ) { $this->register_route( Route::get(    $page, $action ) ); }
-    public function post(    $page, $action ) { $this->register_route( Route::post(   $page, $action ) ); }
-    public function put(     $page, $action ) { $this->register_route( Route::put(    $page, $action ) ); }
-    public function delete(  $page, $action ) { $this->register_route( Route::delete( $page, $action ) ); }
-    public function update(  $page, $action ) { $this->register_route( Route::update( $page, $action ) ); }
+    public function get(    $page, $action ) { Route::get(    $page, $action ); }
+    public function post(   $page, $action ) { Route::post(   $page, $action ); }
+    public function put(    $page, $action ) { Route::put(    $page, $action ); }
+    public function delete( $page, $action ) { Route::delete( $page, $action ); }
+    public function update( $page, $action ) { Route::update( $page, $action ); }
 
 }
 

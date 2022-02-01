@@ -25,10 +25,9 @@ $app->add_dependencies( $cont );
 
 
 // register routes here
-$app->get( "index", function() {
+Route::get( "index", function() {
     echo "inside index page!<br />";
 });
-
 
 // not found route
 $app->get( "404", function(){
@@ -39,11 +38,8 @@ $app->get( "/", function() {
     echo "inside index page!<br />";
 });
 
-$app->get( "profile",function() {
+Route::get( "profile",function() {
     echo "inside profile page!<br />";
 });
 
-//$app->run();
-//echo $_SERVER[ "REQUEST_URI" ];
-//echo Router::get_page_from_uri( $_SERVER[ "REQUEST_URI" ] ) . PHP_EOL;
-var_dump( Router::get_params_from_uri( $_SERVER[ "REQUEST_URI" ] ) );
+$app->run();

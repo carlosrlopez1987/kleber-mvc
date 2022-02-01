@@ -1,186 +1,62 @@
-   public function run()
-    {
-        
-        $this->begin_routing();
-        
-    }
-    
-    private function begin_routing()
-    {
-        // get request!
-        
-        // process request
-        
-        // send response
-        $req             = $this->_templates[ self::REQUEST_TEMPLATE ];
-        
-        $this->_request  = new $req();
-        
-        $router          = $this->_templates[ self::ROUTER_TEMPLATE ];
-          
-        $this->_router   = new $router( App::get_instance() );
-        
-        
-        $this->_response = $this->_router->prepare_response( $this->_request );
-        
-        
-    }
 
-    public static function get_instance()
-    {
-        // check if the instance exists or it's null
-        if ( self::$app_instance == null | !isset( self::$app_instance ) )
-        {
-            // create a new app instance
-            self::$app_instance = new self();
-        }
-        
-        return self::$app_instance;
-    }
-    
-    public static function get_routes( $method = null ){
-        $app = App::get_instance();
-       
-        $routes = $app->_routes;    // returns all routes if no method is provided
-        
-        if ( $method !== null )
-        {
-            $routes = $app->_routes[ $method ];
-        }
-        
-        return $routes;
-    }
 
-    public static function get( $url, $action, $name = '' )
-    {
-        $route = self::make_route( self::GET, $url, $action, $name );
-        App::register_route($route);
-    }
 
-    public static function post( $url, $action, $name = '' )
-    {
-        $route = self::make_route( self::POST, $url, $action, $name );
-        App::register_route($route);
-    }
 
-    protected static function make_route( $method, $url, $action, $name = '' )
-    {
-        // first we need to get the app's instance
-        $app = self::get_instance();
-        
-        // 
-        $fact_name = static::ROUTE_FACTORY_TEMPLATE;
-        $route_templ = self::ROUTE_TEMPLATE;
-        
-        // need route factory service to create a route
-        // check if one exists or create one 
-        $route_factory = $app->get_factory( $fact_name );
-            
-        // pass the route template name so that it know what to create
-        $route_factory->load_settings( $route_templ );
-        
-        
-        // ask the factory to create a route
-        $route = $route_factory->make( $method, $url, $action );
 
-        // return route
-        return $route;
-    }
+example on how to make routes
 
-    protected static function register_route( $route ) 
-    {
-        $route_registered = false;
-        
-        $app    = App::get_instance();
-        $method = $route->get_method();
-        $name   = $route->get_name();
-        
-        if ( App::route_exists( $route ) === false )
-        {
-            $app->_routes[ $method ][ $name ] = $route;
-            $route_registered = true;
-        }
-        
-        return $route_registered;
-    }
-    
-    public static function route_exists( $route )
-    {
-        $app = self::get_instance();
-        
-        $_route = false;
-        
-        $name   = $route->get_name();
-        $method = $route->get_method();
-        
-        $routes = $app->get_routes();
 
-        
-        if ( isset ( $routes[ $method ] ) )
-        {
-            if ( array_key_exists( $name, $routes[ $method ] ) )
-            {
-                $_route = $routes[ $method ][ $name ];
-            }
-        }
-        
-        return $_route;
-    }
-   
-    public function load_templates( $arr )
-    {
-        $this->_templates = $arr;
-    }
-    
-    public function &get_factory( $name )
-    {
-        $factory = $this->factory_exists( $name );
-        
-        if ( $factory )
-          {
-            $factory = $this->_factories[ $name ];
-          }
-        else
-          {
-            // no route factory exists so lets create one
-            // services are stored as the name of the class
-            
-            $template_exist = array_key_exists( $name, $this->_templates );
-           
-            if ( $template_exist )
-            {
-                $route_template = $this->_templates[ self::ROUTE_TEMPLATE ];
-                
-                $template_name = $this->_templates[ $name ];
-    
-                $factory = new $template_name();
-                
-                $factory->load_settings( $route_template );
-                
-                $this->_factories[ $name ] = $factory;
-            }
-            
-          }
-          
-        return $factory;
-    }
-    
-    public function factory_exists( $name )
-    {
-        $factories = $this->_factories;
-        $exists = false;
-        
-        $factory_exist = array_key_exists( $name, $factories );
-        
-        if ( $factory_exist )
-        {
-            $exists = true;
-        }
-        
-        return $exists;
-    }
-    
-    public function get_request()
-    {
-        return $this->_request;
-    }
+App::get( "index", "IndexController@index" );
+
+App::service( "router" )->any( "test", "TestController@test" );
+
+A::router()->post( "login", "LoginController@login" );
+
+
+//
+
+
+index page
+
+// instatiate application
+$app = App::get_instance();
+	- new App();
+
+//do any configuration
+$config = new Config();
+
+//create dependencies
+$app->add_dependencies( $dep );
+
+//create/register routes
+
+examples on how to make routes
+App::get( "index", "IndexController@index" );
+App::service( "router" )->any( "test", "TestController@test" );
+App::router()->post( "login", "LoginController@login" );
+
+Router::get( "register", "RegisterController@index" );
+	- self::get_inst()->get( "register", "RegisterController@index" );
+	
+Route::get( "profile", "ProfileController@index" );
+	- App::get( "profile", "ProfileController@index" );
+	
+	
+	
+$app->run();
+	- get request
+		- process uri string as request object
+		- return request object
+	- respond to request
+		- call action method/function
+
+
+
+
+
+
+
+
+
+
+

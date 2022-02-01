@@ -23,6 +23,11 @@ class Router {
         $this->submit( $req );    
     }
     
+    //submits a request to app for processing
+    public function submit( $req ) {
+        
+    }
+    
     /*
      * Returns an associative array containing request information
      * 
@@ -87,6 +92,7 @@ class Router {
         return $url[ 0 ];
     }
     
+    // return an array with params from uri string
     public static function get_params_from_uri( $uri ) {
         $params = self::remove_slashes( $uri );
         $token = '/';
