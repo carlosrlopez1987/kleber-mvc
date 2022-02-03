@@ -74,7 +74,29 @@ class App {
     }
     
     public function run() {
+        $this->_request = Request::getRequest();
+    }
+    public function getRequest(){ return $this->_request; }
+    
+    public function resolve(){
+        $route = $this->find_route( $this->getRequest() );
         
+        $action = $route->get_action();
+        
+        if ( is_callable( $action ) ) {
+            call_user_func( $action ); 
+        }
+        else {
+            if ( gettype( $action ) == "string" ) {
+                $class = $route->get_class();
+                $method = $route->get_classMethod();
+                
+                if ( class_exists( $class ) ) {
+                    $controller = new $class;
+                    $controller->$method;
+                }
+            }
+        }
     }
     
     public function get_notFound() {
@@ -83,11 +105,12 @@ class App {
     
     public function config( $settings ){} // dnt know what to do here yet
     
-    public function register_route( &$route ) {
-        // if found true else false
-        $saved = false;
+    public function register_route( $route ) {
+        
         if ( $route == null ) return false;
-        $found = isset( $this->_routes[ $route->get_method() ][ $route->get_name() ] );
+        
+        $saved = false;
+        $found = isset( $this->_routes[ $route->get_method() ][ $route->get_page() ] );
         
         if ( !$found ) {
             $this->_routes[ $route->get_method() ][ $route->get_name() ] = $route;
@@ -99,8 +122,10 @@ class App {
     
     public function &get_routes(){ return $this->_routes; }
     
-    // todo: if route not found return a not found route
-    public function find_route( $name ) { return $this->_routes[ $name ]; }
+    // finds a route given a req object
+    public function find_route( Request $req ) { 
+        return $this->_routes[ $req->method() ][ $req->page()  ]; 
+    }
     
     public function service( $name ) {
         $service = $this->_services[ $name ];

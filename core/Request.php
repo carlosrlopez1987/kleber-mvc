@@ -9,7 +9,7 @@ class Request
     
     protected $_request = array();
     
-    public function __construct()
+    private function __construct()
     {
         $this->_request[ 'method' ]      = $_SERVER[ 'REQUEST_METHOD' ];
         $this->_request[ 'host' ]        = $_SERVER[ 'HTTP_HOST' ];
@@ -24,6 +24,10 @@ class Request
         
         $this->parse_params();
         
+    }
+    
+    public static function getRequest(){
+        return new Request();
     }
     
     public function params()

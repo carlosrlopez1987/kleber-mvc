@@ -25,9 +25,7 @@ $app->add_dependencies( $cont );
 
 
 // register routes here
-Route::get( "index", function() {
-    echo "inside index page!<br />";
-});
+Route::get( "index", "IndexController@index" );
 
 // not found route
 $app->get( "404", function(){
